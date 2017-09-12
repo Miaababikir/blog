@@ -36,6 +36,9 @@ Route::resource('categories', 'CategoryController', ['except' => ['create']]);
 // TagController Routes
 Route::resource('tags', 'TagController');
 
+// CommentController Routes
+Route::resource('comments', 'CommentController');
+
 // Admin pages routing
 Route::get('admin/login', 'Auth\AdminLoginController@showLoginForm')->name('admin.login');
 
