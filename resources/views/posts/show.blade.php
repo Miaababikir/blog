@@ -7,7 +7,7 @@
     <div class="row">
         <div class="col-md-8">
             <h1>{{ $post->title }}</h1>
-            <p class="lead">{{ $post->body }}</p>
+            <p class="lead">{!! $post->body !!}</p>
 
             <hr>
 
@@ -15,6 +15,36 @@
                 @foreach ($post->tags as $tag)
                     <span class="label label-default">{{ $tag->name }}</span>
                 @endforeach
+            </div>
+
+            <div id="backend-comments">
+              <h3>Comments <small>{{ $post->comments()->count() }} total</small></h3>
+
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Comments</th>
+                    <th width="150px"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @foreach ($post->comments as $comment)
+                    <tr>
+                      <td>{{ $comment->name }}</td>
+                      <td>{{ $comment->email }}</td>
+                      <td>{{ $comment->comment }}</td>
+                      <td>
+                        <a class="btn btn-sm btn-default" href="{{ route('comments.edit', $comment->id) }}"><span class="glyphicon glyphicon-edit"></span> Edit</a>
+                        <a class="btn btn-sm btn-danger" href="{{ route('comments.delete', $comment->id) }}"><span class="glyphicon glyphicon-remove"></span> Delete</a>
+                      </td>
+                    </tr>
+
+                  @endforeach
+                </tbody>
+
+              </table>
             </div>
 
         </div>

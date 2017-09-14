@@ -37,7 +37,11 @@ Route::resource('categories', 'CategoryController', ['except' => ['create']]);
 Route::resource('tags', 'TagController');
 
 // CommentController Routes
-Route::resource('comments', 'CommentController');
+Route::post('comments/{post_id}', ['uses' => 'CommentController@store', 'as' => 'comments.store']);
+Route::get('comments/{id}/edit', ['uses' => 'CommentController@edit', 'as' => 'comments.edit']);
+Route::put('comments/{id}', ['uses' => 'CommentController@update', 'as' => 'comments.update']);
+Route::delete('comments/{id}', ['uses' => 'CommentController@destroy', 'as' => 'comments.destroy']);
+Route::get('comments/{id}/delete', ['uses' => 'CommentController@delete', 'as' => 'comments.delete']);
 
 // Admin pages routing
 Route::get('admin/login', 'Auth\AdminLoginController@showLoginForm')->name('admin.login');
@@ -45,3 +49,7 @@ Route::get('admin/login', 'Auth\AdminLoginController@showLoginForm')->name('admi
 Route::post('admin/login', 'Auth\AdminLoginController@login')->name('admin.login.submit');
 
 Route::get('admin/logout', 'Auth\AdminLoginController@logout')->name('admin.logout');
+
+Route::get('/phpinfo', function() {
+    return phpinfo();
+});

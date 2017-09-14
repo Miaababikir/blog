@@ -5,6 +5,14 @@
 @section('stylesheets')
 
 {!! Html::style('css/select2.min.css') !!}
+{!! Html::script('js/tinymce.min.js') !!}
+
+<script>
+  tinymce.init({
+    selector: 'textarea',
+    plugins: "link code"
+  });
+</script>
 
 @endsection
 
@@ -12,9 +20,10 @@
 
 <div class="row">
     <!-- This type of form is to fill the form automaticly  -->
-    {!! Form::model($post, ['route' => ['posts.update', $post->id], 'method' => 'PUT']) !!}
+    {!! Form::model($post, ['route' => ['posts.update', $post->id], 'method' => 'PUT', 'files' => 'true']) !!}
         <div class="col-md-8">
-            {{ Form::label('title', 'Title:') }}
+            <img class="thumbnail" src="{{ asset('images/' . $post->image) }}" width="750">
+            {{ Form::label('title', 'Title:', ['class' => 'form-spacing-top']) }}
             {{ Form::text('title', null, ['class' => 'form-control input-lg']) }}
 
             {{ Form::label('slug', 'Slug:', ['class' => 'form-spacing-top']) }}
@@ -26,8 +35,10 @@
             <div class="form-group">
                 {{ Form::label('tags', 'Tags:', ['class' => 'form-spacing-top']) }}
                 {{ Form::select('tags[]', $tags, null, ['class' => 'form-control select2-multi', 'multiple' => 'multiple']) }}
-
             </div>
+
+            {{ Form::label('featured_image', 'Update Featured Image') }}
+            {{ Form::file('featured_image') }}
 
             {{ Form::label('body', 'Body:', ['class' => 'form-spacing-top']) }}
             {{ Form::textarea('body', null, ['class' => 'form-control']) }}

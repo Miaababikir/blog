@@ -8,6 +8,9 @@ use App\Post;
 use App\Category;
 use App\Tag;
 use Session;
+use Purifier;
+use Image;
+use Storage;
 
 class PostController extends Controller
 {
@@ -58,10 +61,11 @@ class PostController extends Controller
     {
         // Validate hte data
         $this->validate($request, array(
-                'title' => 'required|max:255' ,
-                'slug' => 'required|alpha_dash|min:5|max:255|unique:posts,slug',
-                'category_id' => 'required|integer',
-                'body' => 'required',
+                'title'           => 'required|max:255' ,
+                'slug'            => 'required|alpha_dash|min:5|max:255|unique:posts,slug',
+                'category_id'     => 'required|integer',
+                'body'            => 'required',
+                'featured_image'  => 'sometimes|image'
             ));
 
         // Store it in the database
@@ -70,6 +74,21 @@ class PostController extends Controller
         $post->slug = $request->slug;
         $post->category_id = $request->category_id;
         $post->body = $request->body;
+
+        // Check if there image file
+        if ($request->hasFile('featured_image'))
+        {
+          // Store the file in this var $image
+          $image = $request->file('featured_image');
+          // Rename the file that been Uploaded to resolve conflict
+          $filename = time() . '.' . $image->getClientOriginalExtension();
+          // Settiong the path{File location}
+          $location = public_path('images/' . $filename);
+          // Create the file and resize it and save it in the local storage
+          Image::make($image)->resize(800, 400)->save($location);
+          // Save the file name in the database
+          $post->image = $filename;
+        }
 
         $post->save();
 
@@ -141,28 +160,38 @@ class PostController extends Controller
         // Validate the data
         $post = Post::find($id);
 
-        if ($request->input('slug') == $post->slug)
-        {
-            $this->validate($request, array(
-                        'title' => 'required|max:255' ,
-                        'body' => 'required',
-                        'slug' => 'required|alpha_dash|min:5|max:255'
-                    ));
-        }
-        else
-        {
-            $this->validate($request, array(
-                        'title' => 'required|max:255' ,
-                        'body' => 'required',
-                        'slug' => 'required|alpha_dash|min:5|max:255|unique:posts,slug'
-                    ));
-        }
+        $this->validate($request, array(
+                    'title'           => 'required|max:255' ,
+                    'body'            => 'required',
+                    'slug'            => "required|alpha_dash|min:5|max:255|unique:posts,slug,$id",
+                    'featured_image'  => 'image'
+                ));
 
         // Save changes to database
         $post->title = $request->input('title');
         $post->body = $request->input('body');
         $post->slug = $request->input('slug');
         $post->category_id = $request->input('category_id');
+
+        // Check if there image file
+        if ($request->hasFile('featured_image'))
+        {
+          // Add The New Photo
+          // Store the file in this var $image
+          $image = $request->file('featured_image');
+          // Rename the file that been Uploaded to resolve conflict
+          $filename = time() . '.' . $image->getClientOriginalExtension();
+          // Settiong the path{File location}
+          $location = public_path('images/' . $filename);
+          // Create the file and resize it and save it in the local storage
+          Image::make($image)->resize(800, 400)->save($location);
+          $oldFilename = $post->image;
+
+          // Update The Database
+          $post->image = $filename;
+          // Delete Old Photo
+          Storage::delete($oldFilename);
+        }
 
         $post->save();
 
@@ -193,6 +222,9 @@ class PostController extends Controller
         $post = Post::find($id);
         $post->tags()->detach();
 
+        // Delete The Post Image
+        Storage::delete($post->image);
+        
         // Delete the post
         $post->delete();
 
